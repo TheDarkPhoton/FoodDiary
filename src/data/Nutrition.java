@@ -1,6 +1,9 @@
 package data;
 
-public class Nutrition {
+import java.io.Serializable;
+
+public class Nutrition implements Serializable {
+	private static final long serialVersionUID = -7945612544534182608L;
 	private float _grams;
 	private float _cals;
 	private float _f;

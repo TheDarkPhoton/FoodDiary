@@ -9,15 +9,23 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Stack;
+
+import javafx.util.Pair;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -27,65 +35,51 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.data.general.DefaultPieDataset;
 
-import javafx.util.Pair;
+import windows.NewProductWindow;
 
-public class Meal implements DataView, Serializable {
-	private static final long serialVersionUID = 1955433511318756468L;
-	private String _name;
-//	private ImageIcon _img;
-	private ArrayList<ProductRation> _products;
+public class ProductList implements DataView, Serializable {
+	private static final long serialVersionUID = 5986175942046848556L;
 
-	public Meal(String name) {
-		_name = name;
-		_products = new ArrayList<ProductRation>();
-	}
+	private ArrayList<Product> _productList;
 	
-	public Meal(Meal m){
-		_name = m.getName();
-		_products = new ArrayList<ProductRation>();
-		
-		Iterator<ProductRation> i = m.getIterator();
-		while (i.hasNext()){
-			_products.add(i.next());
+	@SuppressWarnings("unchecked")
+	public ProductList() {
+		File f = new File("productList.dat");
+		if(!f.exists()){
+			_productList = new ArrayList<Product>();
+			return;
 		}
-	}
-	
-	public Iterator<ProductRation> getIterator(){
-		return _products.iterator();
-	}
-	
-	public void addProduct(Product p, Float grams){
-		_products.add(new ProductRation(p, grams));
-	}
-	
-	public String getName(){
-		return _name;
-	}
-	
-	public Nutrition getTotalNutrition(){
-		float total_grams = 0;
-		float cals = 0;
-		float f = 0;
-		float c = 0;
-		float p = 0;
 		
-		for (int i = 0; i < _products.size(); i++) {
-			float grams = _products.get(i).getGrams();
-			Nutrition n = _products.get(i).getProduct().getQuantity(grams);
+		try {
+			FileInputStream is = new FileInputStream("productList.dat");
+			ObjectInputStream ois = new ObjectInputStream(is);
 			
-			total_grams += grams;
-			cals += n.getCalories();
-			f += n.getFat();
-			c += n.getCarbs();
-			p += n.getProtein();
+			Object o = ois.readObject();
+			if (o instanceof ArrayList<?>){
+				_productList = (ArrayList<Product>)o;
+			}
+			
+			ois.close();
+			is.close();
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		return new Nutrition(total_grams, cals, f, c, p);
 	}
-
-	@Override
-	public String toString() {
-		return _name;
+	
+	public void saveProductList(){
+		try {
+			FileOutputStream is = new FileOutputStream("productList.dat");
+			ObjectOutputStream os = new ObjectOutputStream(is);
+			
+			os.writeObject(_productList);
+			
+			os.close();
+			is.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -97,7 +91,7 @@ public class Meal implements DataView, Serializable {
 		detailsPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
 		content.add(detailsPanel, BorderLayout.CENTER);
 		
-		JLabel lblDate = new JLabel(_name, SwingUtilities.CENTER);
+		JLabel lblDate = new JLabel("Product List", SwingUtilities.CENTER);
 		lblDate.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 20));
 		detailsPanel.add(lblDate, BorderLayout.NORTH);
 		
@@ -110,17 +104,19 @@ public class Meal implements DataView, Serializable {
 		JPanel dataPanel = new JPanel(new BorderLayout());
 		centeredDataPanel.add(dataPanel);
 		
-		JPanel dataLabelPanel = new JPanel(new GridLayout(4, 1));
+		JPanel dataLabelPanel = new JPanel(new GridLayout(5, 1));
 		dataPanel.add(dataLabelPanel, BorderLayout.WEST);
 
+		dataLabelPanel.add(new JLabel("Grams: "));
 		dataLabelPanel.add(new JLabel("Calories: "));
 		dataLabelPanel.add(new JLabel("Fat: "));
 		dataLabelPanel.add(new JLabel("Carbohidrates: "));
 		dataLabelPanel.add(new JLabel("Protein: "));
 		
-		JPanel dataNumbersPanel = new JPanel(new GridLayout(4, 1));
+		JPanel dataNumbersPanel = new JPanel(new GridLayout(5, 1));
 		dataPanel.add(dataNumbersPanel, BorderLayout.CENTER);
 		
+		dataNumbersPanel.add(new JLabel("100g"));
 		JLabel lblCals = new JLabel("N/A");
 		dataNumbersPanel.add(lblCals);
 		JLabel lblFat = new JLabel("N/A");
@@ -148,12 +144,12 @@ public class Meal implements DataView, Serializable {
 		mealsPanel.setBorder(new EmptyBorder(2, 2, 2, 0));
 		content.add(mealsPanel, BorderLayout.WEST);
 		
-		DefaultListModel<ProductRation> listModel = new DefaultListModel<ProductRation>();
-		for (int i = 0; i < _products.size(); i++) {
-			listModel.addElement(_products.get(i));
+		DefaultListModel<Product> listModel = new DefaultListModel<Product>();
+		for (int i = 0; i < _productList.size(); i++) {
+			listModel.addElement(_productList.get(i));
 		}
 		
-		JList<ProductRation> list = new JList<ProductRation>(listModel);
+		JList<Product> list = new JList<Product>(listModel);
 		list.addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -161,10 +157,9 @@ public class Meal implements DataView, Serializable {
 				if (list.isSelectionEmpty())
 					return;
 				
-				float grams = listModel.get(list.getSelectedIndex()).getGrams();
-				Product product = listModel.get(list.getSelectedIndex()).getProduct();
+				Product product = listModel.get(list.getSelectedIndex());
 				
-				Nutrition n = product.getQuantity(grams);
+				Nutrition n = product.getQuantity(100);
 				lblCals.setText("" + n.getCalories());
 				lblFat.setText("" + n.getFat());
 				lblCarbs.setText("" + n.getCarbs());
@@ -177,24 +172,47 @@ public class Meal implements DataView, Serializable {
 				
 				pieChart.setChart(ChartFactory.createPieChart("Total Nutrients Consumed", dataset));
 				pieChart.getChart().setBackgroundPaint(new Color(0, 0, 0, 0));
+				
+				if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
+					Product selectedProduct = listModel.get(list.getSelectedIndex());
+					String input = JOptionPane.showInputDialog("Enter quantity of the ingrediant in grams.", "100");
+					
+					if (input == null) return;
+					
+					while (!input.matches("[-+]?[0-9]*\\.?[0-9]+")){
+						input = JOptionPane.showInputDialog("Enter quantity of the ingrediant in grams.", "100");
+						if (input == null) return;
+					}
+					
+					hierarchy.pop();
+					Meal meal = (Meal)hierarchy.peek().getValue();
+					meal.addProduct(selectedProduct, Float.parseFloat(input));
+					hierarchy.peek().getValue().changeView(hierarchy, content);
+				}
 			}
 		});
 		
 		JScrollPane listScrollPane = new JScrollPane(list);
 		listScrollPane.setPreferredSize(new Dimension(180, 0));
-		mealsPanel.add(listScrollPane,BorderLayout.CENTER);
+		mealsPanel.add(listScrollPane, BorderLayout.CENTER);
 		
 		JPanel south = new JPanel(new BorderLayout());
 		mealsPanel.add(south, BorderLayout.SOUTH);
 		
-		JButton btnRight = new JButton("Add Product");
+		JButton btnRight = new JButton("New Product");
 		btnRight.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ProductList productList = new ProductList();
-				hierarchy.push(new Pair<Integer, DataView>(0, productList));
-				productList.changeView(hierarchy, content);
+				NewProductWindow wndProduct = new NewProductWindow();
+				wndProduct.setVisible(true);
+				
+				Product p = wndProduct.getProduct();
+				if (p != null){
+					_productList.add(p);
+					saveProductList();
+					listModel.addElement(p);
+				}
 			}
 		});
 		south.add(btnRight, BorderLayout.EAST);
@@ -205,31 +223,54 @@ public class Meal implements DataView, Serializable {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				hierarchy.pop();
-				if (!listModel.isEmpty())
-					hierarchy.peek().getValue().addItem(Meal.this);
 				hierarchy.peek().getValue().changeView(hierarchy, content);
 			}
 		});
 		south.add(btnLeft, BorderLayout.WEST);
 		
-//Details' control area
+//details area buttons
 		JPanel controlPanel = new JPanel(new BorderLayout());
 		detailsPanel.add(controlPanel, BorderLayout.SOUTH);
 
 		JPanel controlLeftPanel = new JPanel(new GridLayout(1, 3));
 		controlPanel.add(controlLeftPanel, BorderLayout.WEST);
 		
-		JButton remove = new JButton("Remove");
-		controlLeftPanel.add(remove);
-		remove.addActionListener(new ActionListener() {
+		JButton editProduct = new JButton("Edit Product");
+		controlLeftPanel.add(editProduct);
+		editProduct.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (list.isSelectionEmpty())
 					return;
 				
-				_products.remove(list.getSelectedIndex());
+				int selection = list.getSelectedIndex();
+				
+				NewProductWindow wndProduct = new NewProductWindow(listModel.get(selection));
+				wndProduct.setVisible(true);
+				
+				Product p = wndProduct.getProduct();
+				if (p != null){
+					_productList.remove(selection);
+					_productList.add(selection, p);
+					saveProductList();
+					listModel.remove(selection);
+					listModel.add(selection, p);
+				}
+			}
+		});
+		JButton deleteProduct = new JButton("Delete Product");
+		controlLeftPanel.add(deleteProduct);
+		deleteProduct.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (list.isSelectionEmpty())
+					return;
+
+				_productList.remove(list.getSelectedIndex());
 				listModel.remove(list.getSelectedIndex());
+				saveProductList();
 			}
 		});
 		
@@ -239,6 +280,12 @@ public class Meal implements DataView, Serializable {
 
 	@Override
 	public void addItem(DataView item) {
-		System.out.println("To add product to a meal you must use AddProduct method.");
+		if (item instanceof Product){
+			_productList.add((Product)item);
+			saveProductList();
+		}
+		else{
+			System.out.println("Adding non-Product item to ProductList object is not allowed");
+		}
 	}
 }
