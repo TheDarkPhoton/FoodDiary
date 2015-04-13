@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -33,6 +34,9 @@ import javax.swing.border.EmptyBorder;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.labels.PieSectionLabelGenerator;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 
 import windows.NewProductWindow;
@@ -138,6 +142,11 @@ public class ProductList implements DataView, Serializable {
 		pieChart.setMinimumDrawHeight(0);
 		pieChart.setMaximumDrawHeight(Integer.MAX_VALUE);
 		detailsCentrePanel.add(pieChart, BorderLayout.CENTER);
+
+		PiePlot plot = (PiePlot) pieChart.getChart().getPlot();
+		PieSectionLabelGenerator gen = new StandardPieSectionLabelGenerator(
+				"{0}: {1} ({2})", new DecimalFormat("0"), new DecimalFormat("0%"));
+		plot.setLabelGenerator(gen);
 		
 //List Area
 		JPanel mealsPanel = new JPanel(new BorderLayout());

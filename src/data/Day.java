@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +31,9 @@ import javax.swing.border.EmptyBorder;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.labels.PieSectionLabelGenerator;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 
 import windows.SetMealPeriods;
@@ -169,6 +173,11 @@ public class Day implements DataView, Serializable {
 		pieChart.setMinimumDrawHeight(0);
 		pieChart.setMaximumDrawHeight(Integer.MAX_VALUE);
 		detailsPanel.add(pieChart, BorderLayout.CENTER);
+		
+		PiePlot plot = (PiePlot) pieChart.getChart().getPlot();
+		PieSectionLabelGenerator gen = new StandardPieSectionLabelGenerator(
+				"{0}: {1} ({2})", new DecimalFormat("0"), new DecimalFormat("0%"));
+		plot.setLabelGenerator(gen);
 		
 //List Area
 		JPanel mealsPanel = new JPanel(new BorderLayout());

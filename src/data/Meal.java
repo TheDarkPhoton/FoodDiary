@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Stack;
@@ -25,6 +26,9 @@ import javax.swing.border.EmptyBorder;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.labels.PieSectionLabelGenerator;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 
 import javafx.util.Pair;
@@ -33,29 +37,29 @@ public class Meal implements DataView, Serializable {
 	private static final long serialVersionUID = 1955433511318756468L;
 	private String _name;
 //	private ImageIcon _img;
-	private ArrayList<ProductRation> _products;
+	private ArrayList<ProductAmount> _products;
 
 	public Meal(String name) {
 		_name = name;
-		_products = new ArrayList<ProductRation>();
+		_products = new ArrayList<ProductAmount>();
 	}
 	
 	public Meal(Meal m){
 		_name = m.getName();
-		_products = new ArrayList<ProductRation>();
+		_products = new ArrayList<ProductAmount>();
 		
-		Iterator<ProductRation> i = m.getIterator();
+		Iterator<ProductAmount> i = m.getIterator();
 		while (i.hasNext()){
 			_products.add(i.next());
 		}
 	}
 	
-	public Iterator<ProductRation> getIterator(){
+	public Iterator<ProductAmount> getIterator(){
 		return _products.iterator();
 	}
 	
 	public void addProduct(Product p, Float grams){
-		_products.add(new ProductRation(p, grams));
+		_products.add(new ProductAmount(p, grams));
 	}
 	
 	public String getName(){
@@ -142,18 +146,23 @@ public class Meal implements DataView, Serializable {
 		pieChart.setMinimumDrawHeight(0);
 		pieChart.setMaximumDrawHeight(Integer.MAX_VALUE);
 		detailsCentrePanel.add(pieChart, BorderLayout.CENTER);
+
+		PiePlot plot = (PiePlot) pieChart.getChart().getPlot();
+		PieSectionLabelGenerator gen = new StandardPieSectionLabelGenerator(
+				"{0}: {1} ({2})", new DecimalFormat("0"), new DecimalFormat("0%"));
+		plot.setLabelGenerator(gen);
 		
 //List Area
 		JPanel mealsPanel = new JPanel(new BorderLayout());
 		mealsPanel.setBorder(new EmptyBorder(2, 2, 2, 0));
 		content.add(mealsPanel, BorderLayout.WEST);
 		
-		DefaultListModel<ProductRation> listModel = new DefaultListModel<ProductRation>();
+		DefaultListModel<ProductAmount> listModel = new DefaultListModel<ProductAmount>();
 		for (int i = 0; i < _products.size(); i++) {
 			listModel.addElement(_products.get(i));
 		}
 		
-		JList<ProductRation> list = new JList<ProductRation>(listModel);
+		JList<ProductAmount> list = new JList<ProductAmount>(listModel);
 		list.addMouseListener(new MouseAdapter() {
 			
 			@Override
