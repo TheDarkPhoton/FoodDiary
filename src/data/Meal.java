@@ -37,29 +37,29 @@ public class Meal implements DataView, Serializable {
 	private static final long serialVersionUID = 1955433511318756468L;
 	private String _name;
 //	private ImageIcon _img;
-	private ArrayList<ProductAmount> _products;
+	private ArrayList<ProductRation> _products;
 
 	public Meal(String name) {
 		_name = name;
-		_products = new ArrayList<ProductAmount>();
+		_products = new ArrayList<ProductRation>();
 	}
 	
 	public Meal(Meal m){
 		_name = m.getName();
-		_products = new ArrayList<ProductAmount>();
+		_products = new ArrayList<ProductRation>();
 		
-		Iterator<ProductAmount> i = m.getIterator();
+		Iterator<ProductRation> i = m.getIterator();
 		while (i.hasNext()){
 			_products.add(i.next());
 		}
 	}
 	
-	public Iterator<ProductAmount> getIterator(){
+	public Iterator<ProductRation> getIterator(){
 		return _products.iterator();
 	}
 	
 	public void addProduct(Product p, Float grams){
-		_products.add(new ProductAmount(p, grams));
+		_products.add(new ProductRation(p, grams));
 	}
 	
 	public String getName(){
@@ -157,12 +157,12 @@ public class Meal implements DataView, Serializable {
 		mealsPanel.setBorder(new EmptyBorder(2, 2, 2, 0));
 		content.add(mealsPanel, BorderLayout.WEST);
 		
-		DefaultListModel<ProductAmount> listModel = new DefaultListModel<ProductAmount>();
+		DefaultListModel<ProductRation> listModel = new DefaultListModel<ProductRation>();
 		for (int i = 0; i < _products.size(); i++) {
 			listModel.addElement(_products.get(i));
 		}
 		
-		JList<ProductAmount> list = new JList<ProductAmount>(listModel);
+		JList<ProductRation> list = new JList<ProductRation>(listModel);
 		list.addMouseListener(new MouseAdapter() {
 			
 			@Override

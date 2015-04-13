@@ -2,17 +2,17 @@ package data;
 
 import java.io.Serializable;
 
-public class ProductAmount implements Serializable {
+public class ProductRation implements Serializable {
 	private static final long serialVersionUID = -8209370788758317246L;
 	private Product _p;
 	private float _grams;
 	
-	public ProductAmount(Product p, float grams) {
+	public ProductRation(Product p, float grams) {
 		_p = new Product(p);
 		_grams = grams;
 	}
 	
-	public ProductAmount(ProductAmount pr){
+	public ProductRation(ProductRation pr){
 		_p = new Product(pr.getProduct());
 		_grams = pr.getGrams();
 	}
