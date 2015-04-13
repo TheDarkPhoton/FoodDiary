@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -108,9 +109,16 @@ public class Day implements DataView, Serializable {
 		detailsPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
 		content.add(detailsPanel, BorderLayout.CENTER);
 		
+		JPanel titlePanel = new JPanel(new GridLayout(2, 1));
+		detailsPanel.add(titlePanel, BorderLayout.NORTH);
+		
 		JLabel lblDate = new JLabel(getStringDate() + " - day " + (hierarchy.peek().getKey() + 1) + " of the Program", SwingUtilities.CENTER);
 		lblDate.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 20));
-		detailsPanel.add(lblDate, BorderLayout.NORTH);
+		titlePanel.add(lblDate);
+		
+		JLabel lblCaloriesConsumed = new JLabel(getCaloriesConsumed() + " Calories Consumed", SwingUtilities.CENTER);
+		lblCaloriesConsumed.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 20));
+		titlePanel.add(lblCaloriesConsumed);
 		
 		JPanel detailsBottomPanel = new JPanel(new BorderLayout());
 		detailsPanel.add(detailsBottomPanel, BorderLayout.SOUTH);
