@@ -32,6 +32,7 @@ public class NewProductWindow extends JDialog {
 	public NewProductWindow() {
 		super(Diary.window, "New Product", true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setResizable(false);
 		
 		initialise();
 		

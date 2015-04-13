@@ -20,6 +20,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -29,6 +30,8 @@ import javax.swing.border.EmptyBorder;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.data.general.DefaultPieDataset;
+
+import windows.SetMealPeriods;
 
 public class Day implements DataView, Serializable {
 	private static final long serialVersionUID = 5607525692382353006L;
@@ -128,8 +131,14 @@ public class Day implements DataView, Serializable {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				_days.add(new Day(_days.get(currentDay).getDate(), _days));
+				int answer = JOptionPane.showConfirmDialog(null, "Do you want to use default Meal Periods?");
 				
+				if (answer == JOptionPane.CANCEL_OPTION)
+					return;
+				else if (answer == JOptionPane.NO_OPTION)
+					new SetMealPeriods().setVisible(true);
+				
+				_days.add(new Day(_days.get(currentDay).getDate(), _days));
 				int newDay = hierarchy.pop().getKey() + 1;
 				hierarchy.push(new Pair<Integer, DataView>(newDay, _days.get(newDay)));
 				hierarchy.peek().getValue().changeView(hierarchy, content);
@@ -221,7 +230,6 @@ public class Day implements DataView, Serializable {
 
 	@Override
 	public void addItem(DataView item) {
-		// TODO Auto-generated method stub
-		
+		System.out.println("Day's addItem called...");
 	}
 }

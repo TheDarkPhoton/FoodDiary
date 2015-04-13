@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import data.Data;
 import data.DataView;
 import data.Day;
+import data.Meal;
 
 public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -3960547557462012371L;
@@ -31,8 +32,12 @@ public class MainWindow extends JFrame {
 	private transient WindowAdapter _closingEvent = new WindowAdapter() {
 		@Override
 		public void windowClosing(WindowEvent e) {
-			while (_hierarchy.size() > 1)
-				_hierarchy.pop();
+			while (_hierarchy.size() > 1){
+				DataView o = _hierarchy.pop().getValue();
+				if (o instanceof Meal){
+					_hierarchy.peek().getValue().addItem(o);
+				}
+			}
 			
 			try {
 				FileOutputStream is = new FileOutputStream("dayRecords.dat");

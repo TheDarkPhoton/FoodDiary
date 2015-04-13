@@ -6,8 +6,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -54,9 +54,22 @@ public class MealPeriod implements DataView, Serializable {
 	public String getName(){
 		return _name;
 	}
+	public void setName(String name){
+		_name = name;
+	}
 	
 	public String getMealTime(){
 		return _mealTime;
+	}
+	public void setMealTime(String time){
+		_mealTime = time;
+	}
+	
+	public String getMealCalories(){
+		return _mealCals;
+	}
+	public void setMealCalories(String cals){
+		_mealCals = cals;
 	}
 	
 	public int getTargetCalories(){
@@ -128,14 +141,19 @@ public class MealPeriod implements DataView, Serializable {
 		JPanel detailsBottomPanel = new JPanel(new BorderLayout());
 		detailsPanel.add(detailsBottomPanel, BorderLayout.SOUTH);
 		
-		detailsBottomPanel.add(new JLabel("Calories Consumed:"), BorderLayout.NORTH);
+//Progress Bar
+		JPanel progressBarPanel = new JPanel(new BorderLayout());
+		detailsBottomPanel.add(progressBarPanel, BorderLayout.CENTER);
+		
+		progressBarPanel.add(new JLabel("Calories Consumed:"), BorderLayout.NORTH);
 		JProgressBar progress = new JProgressBar(0, getTargetCalories());
 		progress.setStringPainted(true);
 		progress.setPreferredSize(new Dimension(0, 26));
 		progress.setValue((int)getCaloriesConsumed());
 		progress.setString(progress.getValue() + " / " + progress.getMaximum());
-		detailsBottomPanel.add(progress, BorderLayout.CENTER);
+		progressBarPanel.add(progress, BorderLayout.CENTER);
 		
+//Pie Chart
 		DefaultPieDataset dataset = new DefaultPieDataset();
 		dataset.setValue("Fat", getFatConsumed());
 		dataset.setValue("Carbohydrates", getCarbohydratesConsumed());
@@ -160,20 +178,16 @@ public class MealPeriod implements DataView, Serializable {
 		}
 		
 		JList<Meal> list = new JList<Meal>(listModel);
-		list.addMouseListener(new MouseAdapter() {
+		list.addKeyListener(new KeyAdapter() {
 			
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void keyPressed(KeyEvent e) {
 				if (list.isSelectionEmpty())
 					return;
 				
-				if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
-					int selection = list.getSelectedIndex();
-					hierarchy.push(new Pair<Integer, DataView>(selection, listModel.get(selection)));
-					hierarchy.peek().getValue().changeView(hierarchy, content);
-					
-					_meals.remove(selection);
-					listModel.remove(selection);
+				if (e.getKeyCode() == KeyEvent.VK_DELETE){
+					_meals.remove(list.getSelectedIndex());
+					listModel.remove(list.getSelectedIndex());
 				}
 			}
 		});
@@ -184,6 +198,29 @@ public class MealPeriod implements DataView, Serializable {
 		
 		JPanel south = new JPanel(new BorderLayout());
 		mealsPanel.add(south, BorderLayout.SOUTH);
+		
+		JPanel editButtonPanel = new JPanel(new BorderLayout());
+		detailsBottomPanel.add(editButtonPanel, BorderLayout.WEST);
+		
+		editButtonPanel.add(new JLabel(" "), BorderLayout.NORTH);
+		
+		JButton edit = new JButton("Edit Meal");
+		editButtonPanel.add(edit, BorderLayout.CENTER);
+		edit.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (list.isSelectionEmpty())
+					return;
+				
+				int selection = list.getSelectedIndex();
+				hierarchy.push(new Pair<Integer, DataView>(selection, listModel.get(selection)));
+				hierarchy.peek().getValue().changeView(hierarchy, content);
+				
+				_meals.remove(selection);
+				listModel.remove(selection);
+			}
+		});
 		
 		JButton btnRight = new JButton("Add Meal");
 		btnRight.addActionListener(new ActionListener() {
